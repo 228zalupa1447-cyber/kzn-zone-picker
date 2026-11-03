@@ -15,9 +15,9 @@
  #list{flex:1;overflow-y:auto;padding:0 12px;font-size:12.5px}
  .chip{display:inline-block;background:#2a3a52;color:#cfe1ff;border-radius:6px;
    padding:2px 8px;margin:2px 3px 2px 0;font-size:12px}
- #send{margin:8px 12px 12px;padding:11px;border:none;border-radius:10px;background:#3390ec;
-   color:#fff;font-size:16px;font-weight:600;cursor:pointer}
- #send:disabled{background:#3d4b5e;cursor:default}
+ #send,#save2{margin:8px 12px 12px;padding:11px;border:none;border-radius:10px;background:#3390ec;
+   color:#fff;font-size:16px;font-weight:600;cursor:pointer;width:calc(100% - 24px)}
+ #send:disabled,#save2:disabled{background:#3d4b5e;cursor:default}
  .lbl{font:11px system-ui;color:#222;background:transparent;border:none;text-shadow:0 0 3px #fff,0 0 3px #fff}
  #warn{position:absolute;left:8px;top:8px;z-index:1200;background:#fff3cd;color:#664d03;
    padding:6px 10px;border-radius:8px;font-size:12.5px;display:none;max-width:70%}
@@ -30,6 +30,7 @@
  <input id="name" placeholder="Название зоны, напр. Мой район">
  <div id="cntrow">Отмечено: <b id="cnt">0</b> кварталов</div>
  <div id="list"></div>
+ <button id="save2" disabled>💾 Сохранить зону</button>
  <button id="send" disabled>📋 Скопировать выбор для бота</button>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -78,6 +79,29 @@ function fallbackCopy(t){
  try{ document.execCommand('copy'); }catch(e){}
  document.body.removeChild(ta);
 }
+const базовый = Object.keys(byId).sort();
+function паковать(){
+ const инд=[...sel].map(id=>базовый.indexOf(id)).sort((a,b)=>a-b);
+ const out=[]; let prev=0;
+ for(const i of инд){ let d=i-prev; prev=i;
+   while(d>=128){ out.push((d&127)|128); d>>>=7; }
+   out.push(d); }
+ let s=btoa(String.fromCharCode.apply(null,out));
+ return s.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+document.getElementById('save2').onclick=function(){
+ const st=document.getElementById('list');
+ const инд=[...sel].map(id=>базовый.indexOf(id)).sort((a,b)=>a-b);
+ if(!инд.length) return;
+ let код=паковать();
+ let имя=document.getElementById('name').value.trim();
+ let хвост='';
+ if(имя){ хвост='~'+btoa(unescape(encodeURIComponent(имя))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+ let payload='Z'+код+хвост;
+ if(payload.length>60){ payload='Z'+код;
+   st.innerHTML='<div class="chip" style="color:#e0b070">Имя не влезло в код — зона сохранится с именем по умолчанию, переименуете через /назвать</div>'; }
+ tg.openTelegramLink('https://t.me/kazan_flat_sel_bot?start='+payload);
+};
 document.getElementById('send').onclick=function(){
  const st=document.getElementById('list');
  const ids=[...sel].sort();
