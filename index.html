@@ -30,7 +30,7 @@
  <input id="name" placeholder="Название зоны, напр. Мой район">
  <div id="cntrow">Отмечено: <b id="cnt">0</b> кварталов</div>
  <div id="list"></div>
- <button id="send" disabled>📤 Отправить в бот</button>
+ <button id="send" disabled>📋 Скопировать выбор для бота</button>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -69,24 +69,26 @@ function отрисовать(){
    const s=byId[id]; const ул=(s.streets||[]).map(x=>x[0]).slice(0,3).join(', ');
    return '<span class="chip"><b>'+id+'</b> '+(ул?('· '+ул+'…'):'')+'</span>';
  }).join('');
- sendEl.disabled = !(tg && sel.size);
+ sendEl.disabled = !sel.size;
+}
+function fallbackCopy(t){
+ const ta=document.createElement('textarea'); ta.value=t;
+ ta.style.position='fixed'; ta.style.opacity='0';
+ document.body.appendChild(ta); ta.select();
+ try{ document.execCommand('copy'); }catch(e){}
+ document.body.removeChild(ta);
 }
 document.getElementById('send').onclick=function(){
  const st=document.getElementById('list');
- try{
-  if(!tg){ st.innerHTML='<span class="chip" style="color:#f88">Нет Telegram-окружения</span>'; return; }
-  if(typeof tg.sendData!=='function'){ st.innerHTML='<span class="chip" style="color:#f88">sendData недоступен, версия '+tg.version+' — обновите приложение Telegram</span>'; return; }
-  if(!sel.size){ return; }
-  let nm=document.getElementById('name').value.trim();
-  if(!nm){ nm='Зона '+new Date().toLocaleDateString('ru-RU'); }
-  const payload=JSON.stringify({название:nm, секции:[...sel].sort()});
-  if(new Blob([payload]).size>4000){ st.innerHTML='<span class="chip" style="color:#f88">Слишком много кварталов — снимите часть и отправьте остаток вторым заходом</span>'; return; }
-  const ок=tg.sendData(payload);
-  st.innerHTML='<span class="chip" style="color:#8f8">Отправлено — закрываю…</span>';
-  setTimeout(()=>{ try{ tg.close(); }catch(e){} }, 600);
- }catch(e){
-  st.innerHTML='<span class="chip" style="color:#f88">Ошибка отправки: '+e.message+'</span>';
- }
+ const ids=[...sel].sort();
+ if(!ids.length) return;
+ const текст=ids.join(' ');
+ const done=function(){
+   st.innerHTML='<div class="chip" style="background:#204020;color:#cfc">📋 Скопировано. Перейдите в чат бота, вставьте и отправьте — зона сохранится. Карта остаётся открытой.</div>';
+ };
+ if(navigator.clipboard && navigator.clipboard.writeText){
+   navigator.clipboard.writeText(текст).then(done, function(){ fallbackCopy(текст); done(); });
+ } else { fallbackCopy(текст); done(); }
 };
 document.getElementById('вер').textContent = ВЕРС;
 document.getElementById('ес').textContent = ЕСТЬ_SEND ? 'есть' : 'НЕТ!';
