@@ -94,14 +94,21 @@ document.getElementById('save2').onclick=function(){
  const st=document.getElementById('list');
  const инд=[...sel].map(id=>базовый.indexOf(id)).sort((a,b)=>a-b);
  if(!инд.length) return;
- let код=паковать();
  let имя=document.getElementById('name').value.trim();
- let хвост='';
- if(имя){ хвост='~'+btoa(unescape(encodeURIComponent(имя))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
- let payload='Z'+код+хвост;
- if(payload.length>60){ payload='Z'+код;
-   st.innerHTML='<div class="chip" style="color:#e0b070">Имя не влезло в код — зона сохранится с именем по умолчанию, переименуете через /назвать</div>'; }
- tg.openTelegramLink('https://t.me/kazan_flat_sel_bot?start='+payload);
+ let имяБ=[...new TextEncoder().encode(имя)].slice(0,30);
+ const собрать=function(имяБ){
+  const б=[имяБ.length, ...имяБ];
+  let prev=0;
+  for(const i of инд){ let d=i-prev; prev=i;
+    while(d>=128){ б.push((d&127)|128); d>>>=7; }
+    б.push(d); }
+  return btoa(String.fromCharCode.apply(null,б)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+ };
+ let код='Z'+собрать(имяБ);
+ let пометка=' с именем «'+имя+'»';
+ if(('?start=Z'+код).length>64){ имяБ=[]; код='Z'+собрать(имяБ); пометка=' (имя не влезло в код — переименуете /назвать)'; }
+ st.innerHTML='<div class="chip" style="background:#204020;color:#cfc">✅ Открываю бота — жмите «НАЧАТЬ»'+пометка+'</div>';
+ tg.openTelegramLink('https://t.me/kazan_flat_sel_bot?start='+код);
 };
 document.getElementById('send').onclick=function(){
  const st=document.getElementById('list');
