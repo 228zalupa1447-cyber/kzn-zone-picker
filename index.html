@@ -62,7 +62,7 @@ function toggle(id){
  отрисовать();
 }
 function отрисовать(){
- const cntEl=document.getElementById('cnt'), listEl=document.getElementById('list'), sendEl=document.getElementById('send');
+ const cntEl=document.getElementById('cnt'), listEl=document.getElementById('list'), sendEl=document.getElementById('send'), saveEl=document.getElementById('save2');
  if(!cntEl || !listEl) return;
  cntEl.textContent=sel.size;
  const ids=[...sel].sort();
@@ -71,6 +71,7 @@ function отрисовать(){
    return '<span class="chip"><b>'+id+'</b> '+(ул?('· '+ул+'…'):'')+'</span>';
  }).join('');
  sendEl.disabled = !sel.size;
+ saveEl.disabled = !sel.size;
 }
 function fallbackCopy(t){
  const ta=document.createElement('textarea'); ta.value=t;
