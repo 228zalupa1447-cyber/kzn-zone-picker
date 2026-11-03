@@ -25,7 +25,8 @@
 <div id="map"></div>
 <div id="warn">⚠️ Откройте страницу кнопкой из бота — отправка работает только в Telegram</div>
 <div id="bar">
- <div class="hd">Отмечайте кварталы на карте — повторный тап снимает выбор</div>
+ <div class="hd">Отмечайте кварталы на карте — повторный тап снимает выбор
+  <span style="color:#7d8ba1">· WebApp v<span id="вер">?</span> · sendData: <span id="ес">?</span></span></div>
  <input id="name" placeholder="Название зоны, напр. Мой район">
  <div id="cntrow">Отмечено: <b id="cnt">0</b> кварталов</div>
  <div id="list"></div>
@@ -38,6 +39,8 @@ const tg = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.i
 if (tg) { tg.ready(); tg.expand(); } else {
   document.getElementById('warn').style.display = 'block';
 }
+const ВЕРС = (window.Telegram && window.Telegram.WebApp) ? (window.Telegram.WebApp.version || '?') : '-';
+const ЕСТЬ_SEND = !!(window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.sendData === 'function');
 const map=L.map('map').setView([55.80,49.13],12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OSM'}).addTo(map);
 const byId={}; const sel=new Set(); const polyById={};
@@ -69,10 +72,23 @@ function отрисовать(){
  sendEl.disabled = !(tg && sel.size);
 }
 document.getElementById('send').onclick=function(){
- if(!tg || !sel.size) return;
- let nm=document.getElementById('name').value.trim();
- if(!nm){ nm='Зона '+new Date().toLocaleDateString('ru-RU'); }
- tg.sendData(JSON.stringify({название:nm, секции:[...sel].sort()}));
+ const st=document.getElementById('list');
+ try{
+  if(!tg){ st.innerHTML='<span class="chip" style="color:#f88">Нет Telegram-окружения</span>'; return; }
+  if(typeof tg.sendData!=='function'){ st.innerHTML='<span class="chip" style="color:#f88">sendData недоступен, версия '+tg.version+' — обновите приложение Telegram</span>'; return; }
+  if(!sel.size){ return; }
+  let nm=document.getElementById('name').value.trim();
+  if(!nm){ nm='Зона '+new Date().toLocaleDateString('ru-RU'); }
+  const payload=JSON.stringify({название:nm, секции:[...sel].sort()});
+  if(new Blob([payload]).size>4000){ st.innerHTML='<span class="chip" style="color:#f88">Слишком много кварталов — снимите часть и отправьте остаток вторым заходом</span>'; return; }
+  const ок=tg.sendData(payload);
+  st.innerHTML='<span class="chip" style="color:#8f8">Отправлено — закрываю…</span>';
+  setTimeout(()=>{ try{ tg.close(); }catch(e){} }, 600);
+ }catch(e){
+  st.innerHTML='<span class="chip" style="color:#f88">Ошибка отправки: '+e.message+'</span>';
+ }
 };
+document.getElementById('вер').textContent = ВЕРС;
+document.getElementById('ес').textContent = ЕСТЬ_SEND ? 'есть' : 'НЕТ!';
 setTimeout(()=>{try{отрисовать();}catch(e){}},300);
 </script></body></html>
