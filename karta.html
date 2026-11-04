@@ -668,6 +668,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
  #map{position:absolute;left:0;top:0;right:400px;bottom:0}
  #panel{position:absolute;right:0;top:0;bottom:0;width:400px;background:#fff;
    box-shadow:-2px 0 8px #0003;display:flex;flex-direction:column;z-index:1000}
+ @media (max-width:700px){
+   #map{right:0;bottom:52%}
+   #panel{left:0;top:48%;bottom:0;width:100%}
+   #phead h2{font-size:16px}
+ }
  #phead{padding:12px 14px;border-bottom:2px solid #e8e8ee;background:#f7f8fa}
  #phead h2{margin:0;font-size:18px}
  #phead .sub{color:#667;font-size:12px;margin-top:3px;line-height:1.45}
