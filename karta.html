@@ -743,12 +743,16 @@ const col='#5b6b7a';
 const byId={}; const polyById={}; const sel=new Set();
 for(const s of D.секции){
  byId[s.id]=s;
- const p=L.polygon(s.poly,{color:col,weight:1,fillOpacity:0}).addTo(map);
+const col='#1a5276'; const заливка='#cfe2f3';
+const byId={}; const polyById={}; const sel=new Set();
+for(const s of D.секции){
+ byId[s.id]=s;
+ const p=L.polygon(s.poly,{color:col,weight:1,fillColor:заливка,fillOpacity:0.35}).addTo(map);
  polyById[s.id]=p;
  p.bindTooltip(s.id,{className:'lbl',direction:'center'});
  p.on('click',()=>{ toggle(s.id); показать(s.id); });
- p.on('mouseover',()=>{ if(!sel.has(s.id)) p.setStyle({fillOpacity:0.15,weight:2}); });
- p.on('mouseout',()=>{ if(!sel.has(s.id)) p.setStyle({fillOpacity:0,weight:1}); });
+ p.on('mouseover',()=>{ if(!sel.has(s.id)) p.setStyle({fillOpacity:0.5,weight:2}); });
+ p.on('mouseout',()=>{ if(!sel.has(s.id)) p.setStyle({fillOpacity:0.35,weight:1}); });
 }
 function toggle(id){
  const p=polyById[id];
