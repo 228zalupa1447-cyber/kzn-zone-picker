@@ -754,7 +754,7 @@ for(const s of D.секции){
 }
 function toggle(id){
  const p=polyById[id];
- if(sel.has(id)){ sel.delete(id); p.setStyle({fillOpacity:0,weight:1,color:col}); }
+ if(sel.has(id)){ sel.delete(id); p.setStyle({fillColor:заливка,fillOpacity:0.35,weight:1,color:col}); }
  else { sel.add(id); p.setStyle({fillColor:'#d32f2f',fillOpacity:0.35,weight:2,color:'#d32f2f'}); }
  отрисоватьВыбор();
 }
