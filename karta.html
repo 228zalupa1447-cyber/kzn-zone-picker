@@ -726,7 +726,7 @@ const D={"секции": [{"id": "С2", "p": 0, "axes": " (основное ко
 const tg = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData ? window.Telegram.WebApp : null;
 if (tg) { tg.ready(); tg.expand(); }
 window.onerror = function(msg,src,l){ const d=document.getElementById('диаг'); if(d) d.textContent='ОШИБКА JS: '+msg; };
-const map=L.map('map').setView([55.80,49.13],12);
+const map=L.map('map',{attributionControl:false}).setView([55.80,49.13],12);
 // Telegram Mini App: окно расширяется после загрузки — пересчитать карту
 setTimeout(function(){ map.invalidateSize(); }, 300);
 if (tg) { tg.onEvent('viewportChanged', function(){ map.invalidateSize(); }); }
