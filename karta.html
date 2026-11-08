@@ -729,7 +729,7 @@ const map=L.map('map').setView([55.80,49.13],12);
 setTimeout(function(){ map.invalidateSize(); }, 300);
 if (tg) { tg.onEvent('viewportChanged', function(){ map.invalidateSize(); }); }
 let тайлОш = 0;
-const тайлСлой = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'});
+const тайлСлой = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&hl=ru&x={x}&y={y}&z={z}',{maxZoom:19,subdomains:['0','1','2','3'],attribution:'© Google'});
 тайлСлой.on('tileerror',()=>{ тайлОш++; if(тайлОш===3) document.getElementById('диаг').innerHTML='⚠️ тайлы OSM не грузятся — переключаю на запасные'; });
 тайлСлой.on('tileload',()=>{ if(тайлОш) тайлОш=0; });
 тайлСлой.addTo(map);
