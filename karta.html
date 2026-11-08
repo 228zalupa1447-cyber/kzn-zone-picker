@@ -725,6 +725,9 @@ const tg = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.i
 const sel = new Set();
 window.onerror = function(msg,src,l){ const d=document.getElementById('диаг'); if(d) d.textContent='ОШИБКА JS: '+msg; };
 const map=L.map('map').setView([55.80,49.13],12);
+// Telegram Mini App: окно расширяется после загрузки — пересчитать карту
+setTimeout(function(){ map.invalidateSize(); }, 300);
+if (tg) { tg.onEvent('viewportChanged', function(){ map.invalidateSize(); }); }
 let тайлОш = 0;
 const тайлСлой = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'});
 тайлСлой.on('tileerror',()=>{ тайлОш++; if(тайлОш===3) document.getElementById('диаг').innerHTML='⚠️ тайлы OSM не грузятся — переключаю на запасные'; });
