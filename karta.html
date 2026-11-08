@@ -791,13 +791,23 @@ document.getElementById('save').onclick=function(){
   return btoa(String.fromCharCode.apply(null,б)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
  };
  let имяБ=[...new TextEncoder().encode(имя)].slice(0,30);
- let пометка=' с именем «'+имя+'»';
  let код='Z'+собрать(имяБ);
- if(('?start=Z'+код).length>64){ имяБ=[]; код='Z'+собрать(имяБ); пометка=' (имя не влезло — сохранено с именем по умолчанию, /назвать переименует)'; }
+ let обрезка='';
+ // лимит Telegram: полезная нагрузка /start ≤ 64 символов (считаем 'Z'+код, без '?start=')
+ while(имяБ.length && ('Z'+код).length>64){
+  const т=new TextDecoder().decode(new Uint8Array(имяБ));
+  if(т.length<=1){ имяБ=[]; код='Z'+собрать(имяБ); обрезка='имя не влезло в код — переименуй: /назвать'; break; }
+  имяБ=[...new TextEncoder().encode(т.slice(0,-1))];
+  код='Z'+собрать(имяБ);
+ }
+ if(имяБ.length){
+  const т=new TextDecoder().decode(new Uint8Array(имяБ));
+  if(т.length<имя.length) обрезка='имя уместилось не полностью — в коде «'+т+'»; полное: /назвать '+имя;
+ }
  const ссылка='https://t.me/kazan_flat_sel_bot?start='+код;
- if (tg) { tg.openTelegramLink(ссылка); }
+ if (tg) { if(обрезка) document.getElementById('selmsg').textContent=обрезка; tg.openTelegramLink(ссылка); }
  else if (navigator.clipboard) { navigator.clipboard.writeText(ссылка);
-  document.getElementById('selmsg').textContent='Ссылка скопирована — открой чат бота и отправь /start '+код; }
+  document.getElementById('selmsg').textContent=(обрезка?обрезка+' · ':'')+'Ссылка скопирована — открой чат бота и отправь /start '+код; }
 };
 function показать(id){
  const s=byId[id]; if(!s)return;
